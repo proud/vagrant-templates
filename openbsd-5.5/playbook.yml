@@ -1,0 +1,7 @@
+---
+- hosts: all
+  vars:
+    # Default python path doesn't work on OpenBSD
+    - ansible_python_interpreter: /usr/local/bin/python2.7
+  tasks:
+  # Put your tasks here
