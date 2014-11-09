@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+  - name: ensure apt-proxy is at the latest version
+    apt: pkg=apt-cacher state=latest update_cache=yes
+    sudo: yes
+  - name: allow our private network to access it
+    template: src=templates/allowed_hosts.conf.j2 dest=/etc/apt-cacher/conf.d/allowed_hosts.conf
+    sudo: yes
+  - name: restart apt-cacher service
+    service: name=apt-cacher state=restarted
+    sudo: yes
