@@ -2,11 +2,16 @@
 # vi: set ft=ruby :
 
 VAGRANTFILE_API_VERSION = "2"
+PROXY_IP = "192.168.70.2"
+ALLOWED_HOSTS = "192.168.70.0/24"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "mokote/debian-7"
-  config.vm.network :private_network, ip: "192.168.70.2"
+  config.vm.network :private_network, ip: PROXY_IP
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"
+    ansible.extra_vars = {
+      allowed_hosts: ALLOWED_HOSTS
+    }
   end
 end
