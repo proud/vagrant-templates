@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  vars:
+  - allowed_hosts: "192.168.70.0/24"
   tasks:
   - name: ensure apt-proxy is at the latest version
     apt: pkg=apt-cacher state=latest update_cache=yes
