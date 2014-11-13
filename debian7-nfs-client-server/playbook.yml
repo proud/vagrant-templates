@@ -1,0 +1,44 @@
+---
+- hosts: server
+  tasks:
+  - name: set local apt-cacher as mirror
+    template: src=templates/90aptproxy.j2 dest=/etc/apt/apt.conf.d/90aptproxy
+    sudo: yes
+    when: enable_apt_proxy == "yes"
+  - name: upgrade server
+    apt: upgrade=full update_cache=yes
+    sudo: yes
+  - name: ensure nfs-kernel-server is at the latest version
+    apt: pkg=nfs-kernel-server state=latest
+    sudo: yes
+  - name: ensure /srv/nfs-exported exists and has right permissions
+    file: path=/srv/nfs-exported state=directory owner=root group=root
+    sudo: yes
+  - name: add /srv/nfs-exported to /etc/exports
+    lineinfile: dest=/etc/exports line="/srv/nfs-exported   192.168.70.0/24(rw,sync,no_subtree_check)"
+    sudo: yes
+  - name: restart NFS daemon
+    service: name=nfs-kernel-server state=restarted
+    sudo: yes
+
+- hosts: client
+  tasks:
+  - name: set local apt-cacher as mirror
+    template: src=templates/90aptproxy.j2 dest=/etc/apt/apt.conf.d/90aptproxy
+    sudo: yes
+    when: enable_apt_proxy == "yes"
+  - name: upgrade server
+    apt: upgrade=full update_cache=yes
+    sudo: yes
+  - name: ensure nfs-common is at the latest version
+    apt: pkg=nfs-common state=latest
+    sudo: yes
+  - name: add to /etc/fstab remote filesystem
+    lineinfile: dest=/etc/fstab line="192.168.70.10:/srv/nfs-exported   /mnt/nfs-exported   nfs  auto    0   0"
+    sudo: yes
+  - name: ensure /mnt/nfs-exported exists
+    file: path=/mnt/nfs-exported state=directory
+    sudo: yes
+  - name: mount newly added file system
+    raw: mount -a
+    sudo: yes

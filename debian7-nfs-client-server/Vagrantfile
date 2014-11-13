@@ -1,0 +1,26 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+CLIENT_IP_ADDRESS = "192.168.70.10"
+SERVER_IP_ADDRESS = "192.168.70.11"
+ENABLE_APT_PROXY = "yes"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "mokote/debian-7"
+
+  config.vm.define "server" do |server|
+    server.vm.network :private_network, ip: CLIENT_IP_ADDRESS
+  end
+
+  config.vm.define "client" do |client|
+    client.vm.network :private_network, ip: SERVER_IP_ADDRESS
+  end
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbook.yml"
+    ansible.extra_vars = {
+      enable_apt_proxy: ENABLE_APT_PROXY
+    }
+  end
+end
