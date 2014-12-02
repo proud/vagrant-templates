@@ -1,0 +1,15 @@
+[pool1.local]
+user = pool1
+group = www-data
+listen = 12000
+listen.allowed_clients = 127.0.0.1
+pm = dynamic
+pm.max_children = 10
+pm.start_servers = 4
+pm.min_spare_servers = 2
+pm.max_spare_servers = 6
+access.log = /var/log/php-fpm/$pool.access.log
+slowlog = /var/log/php-fpm/$pool.log.slow
+chroot = /srv/pool1/htdir
+chdir = /
+catch_workers_output = yes

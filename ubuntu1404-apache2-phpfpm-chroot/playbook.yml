@@ -1,0 +1,48 @@
+---
+- hosts: all
+  sudo: yes
+  tasks:
+
+  - name: install required packages
+    apt: pkg={{ item }} state=installed update_cache=yes
+    with_items:
+      - php5-fpm
+      - php5-mysql
+      - mysql-server
+      - apache2
+
+  - name: enable required apache2 modules
+    apache2_module: name={{ item }} state=present
+    with_items:
+      - proxy
+      - proxy_fcgi
+
+  - name: create 'pool1' dedicated user
+    user: name=pool1 state=present home=/srv/pool1
+
+  - name: ensure vhost directories exists
+    file: path=/srv/pool1/ state=directory owner=pool1 group=www-data mode=0750 
+
+  - name: ensure vhost directories exists
+    file: path=/srv/pool1/htdir state=directory owner=pool1 group=www-data mode=0750
+
+  - name: ensure /var/log/php-fpm directory exists
+    file: path=/var/log/php-fpm state=directory owner=root group=www-data mode=0770 
+
+  - name: delete default PHP-FPM pool
+    file: path=/etc/php5/fpm/pool.d/www.conf state=absent
+
+  - name: copy pool1 configuration
+    template: src=templates/pool1.conf.j2 dest=/etc/php5/fpm/pool.d/pool1.conf
+
+  - name: restart php5-fpm daemon
+    service: name=php5-fpm state=restarted
+
+  - name: copy vhost configuration
+    template: src=templates/pool1-vhost.conf.j2 dest=/etc/apache2/sites-available/pool1-vhost.conf
+
+  - name: enable new vhost
+    raw: a2ensite pool1-vhost.conf
+
+  - name: restart apache2 daemon
+    service: name=apache2 state=restarted

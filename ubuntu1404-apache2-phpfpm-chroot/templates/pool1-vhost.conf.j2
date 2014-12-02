@@ -1,0 +1,13 @@
+# vi: set ft=apache :
+<VirtualHost *:80>
+    ServerName pool1.local
+    ServerAdmin webmaster@pool1.local
+    ErrorLog ${APACHE_LOG_DIR}/pool1.local-error.log
+    CustomLog ${APACHE_LOG_DIR}/pool1.local-access.log combined
+    ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://127.0.0.1:12000/$1
+    <Directory /srv/pool1/htdir>
+        Options FollowSymLinks
+        AllowOverride all
+        Require all granted
+    </Directory>
+</VirtualHost>
